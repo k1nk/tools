@@ -15,6 +15,7 @@ from keras.layers import Dense, Activation
 from keras.layers import LSTM
 from keras.optimizers import RMSprop
 from keras.utils.data_utils import get_file
+from keras.callbacks import ModelCheckpoint
 import numpy as np
 import random
 import sys
@@ -58,7 +59,7 @@ model.add(Activation('softmax'))
 
 optimizer = RMSprop(lr=0.01)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer)
-
+model.summary()
 
 def sample(preds, temperature=1.0):
     # helper function to sample an index from a probability array
@@ -74,9 +75,15 @@ for iteration in range(1, 60):
     print()
     print('-' * 50)
     print('Iteration', iteration)
-    model.fit(X, y,
+    #model.fit(X, y,
+    #          batch_size=128,
+    #          epochs=1)
+    history = model.fit(X, y,
               batch_size=128,
-              epochs=1)
+              epochs=1,
+              validation_split=0.1,
+              callbacks=[ModelCheckpoint('simple_lstm_model.h5', monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)])
+    print(history.history)
 
     start_index = random.randint(0, len(text) - maxlen - 1)
 
